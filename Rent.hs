@@ -7,7 +7,9 @@ type Price = Int
 type Order = (Time, Duration, Price) 
 
 process :: ([Order] -> Int) -> String -> String
-process optimize input = unlines $ map show $ map optimize $ extract $ map (map read) $ map words $ lines $ tail input
+process optimize =  output . map optimize . extract . input . tail
+    where output = unlines . map show
+          input  = map (map read) . map words . lines
 
 extract :: [[Int]] -> [[Order]]
 extract ns = let
