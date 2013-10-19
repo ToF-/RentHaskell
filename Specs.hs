@@ -6,10 +6,10 @@ main :: IO ()
 main = hspec $ do
     describe "process" $ do
         it "scan input for a case with orders and output a solution" $ do
-            process mockOptimizer "1\r4\r0 5 10\r3 7 14\r5 9 7\r6 9 8" `shouldBe` "18"
+            process mockOptimizer "1\n4\n0 5 10\n3 7 14\n5 9 7\n6 9 8" `shouldBe` "18\n"
 
         it "scan several cases and give several solutions" $ do
-            process mockOptimizer "2\r1\r0 5 10\r2\r5 9 7\r6 9 8" `shouldBe` "10\r8"
+            process mockOptimizer "2\n1\n0 5 10\n2\n5 9 7\n6 9 8" `shouldBe` "10\n8\n"
 
     describe "extract" $ do
         it "forms a list of lists of orders" $ do
