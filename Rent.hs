@@ -11,6 +11,7 @@ price (_,_,p) = p
 
 optimizeL :: [(Order)] -> Int
 optimizeL [o] = price o
+optimizeL [o,p] = max (price o) (price p)
 
 process :: ([Order] -> Int) -> String -> String
 process optimize =  output . map optimize . extract . input . tail

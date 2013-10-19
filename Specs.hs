@@ -19,7 +19,12 @@ main = hspec $ do
     describe "optimize (list)" $ do
         it "when given 1 order gives the order price" $ property $
             \o -> optimizeL [o] `shouldBe` price o 
+    
+        it "when given 2 incompatible orders gives the bigger price" $ property $
+            \(o,p) -> not (compatible o p) ==> optimizeL [o,p] == max (price o) (price p)   
 
+compatible :: Order -> Order -> Bool
+compatible (s,d,_) (s',d',_) = (s' >= s+d) || (s >= s'+d') 
 mockOptimizer :: [Order] -> Int
 mockOptimizer os = case length os of
                     4 -> 18
