@@ -1,5 +1,6 @@
 -- Spec.hs
 import Test.Hspec
+import Test.QuickCheck
 import Rent
 
 main :: IO ()
@@ -14,6 +15,10 @@ main = hspec $ do
     describe "extract" $ do
         it "forms a list of lists of orders" $ do
             extract [[1],[0,5,10],[2],[3,7,9],[5,9,8]] `shouldBe` [[(0,5,10)],[(3,7,9),(5,9,8)]] 
+
+    describe "optimize (list)" $ do
+        it "when given 1 order gives the order price" $ property $
+            \o -> optimizeL [o] `shouldBe` price o 
 
 mockOptimizer :: [Order] -> Int
 mockOptimizer os = case length os of

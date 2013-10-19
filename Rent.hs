@@ -6,6 +6,12 @@ type Duration = Int
 type Price = Int
 type Order = (Time, Duration, Price) 
 
+price :: Order -> Price
+price (_,_,p) = p
+
+optimizeL :: [(Order)] -> Int
+optimizeL [o] = price o
+
 process :: ([Order] -> Int) -> String -> String
 process optimize =  output . map optimize . extract . input . tail
     where output = unlines . map show
