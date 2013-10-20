@@ -5,6 +5,7 @@ import Rent
 
 main :: IO ()
 main = hspec $ do
+    describe "Rent -- Rent Your Airplane And Make Money\n" $ do 
     describe "process :: String -> String" $ do
         it "scan input for a case with orders and output a solution" $ do
             process mockOptimizer "1\n4\n0 5 10\n3 7 14\n5 9 7\n6 9 8" `shouldBe` "18\n"
