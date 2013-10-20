@@ -63,16 +63,6 @@ compatibleOrders = do startTime <- aTime
                           order2    = (startTime+duration, duration, price2)
                       return (order1, order2)
 
-correct :: Order -> Bool
-correct (s,d,p) = s >=0 && d > 0 && p >=0
-
-testable :: Order -> Order
-testable (s,d,p) = (abs s, 1+abs d, abs p)
-
-compatible :: Order -> Order -> Bool
-compatible (s,d,_) (s',d',_) = ((s' >= s+d) || (s >= s'+d')) && d > 0 && d' > 0
-
-
 mockOptimizer :: [Order] -> Int
 mockOptimizer os = case length os of
                     4 -> 18
