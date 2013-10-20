@@ -1,3 +1,4 @@
+-- Rent.hs
 module Rent
 where
 import Data.List (sort)
@@ -13,10 +14,9 @@ after :: Order -> Order -> Bool
 after (s,d,_) (s',d',_) = s' >= s+d
 
 optimizeL :: [(Order)] -> Int
-optimizeL os = optimizeL' $ sort os 
-
-optimizeL' [] = 0
-optimizeL' (o:os) = max (price o + optimizeL' (filter (after o) os)) (optimizeL' os)
+optimizeL = solution . sort 
+    where solution [] = 0
+          solution (o:os) = max (price o + solution (filter (after o) os)) (solution os)
 
 process :: ([Order] -> Int) -> String -> String
 process optimize =  output . map optimize . extract . input . tail
@@ -24,23 +24,14 @@ process optimize =  output . map optimize . extract . input . tail
           input  = map (map read) . map words . lines
 
 extract :: [[Int]] -> [[Order]]
-extract ns = let
-    lengths = concat $ filter isLength ns
-    orders  = map fromInts $ filter isOrder ns
-    in extract' lengths orders 
-
-extract' :: [Int] -> [Order] -> [[Order]]
-extract' [] _  = []
-extract' (n:ns) os = (take n os) : extract' ns (drop n os) 
-
-isLength :: [Int] -> Bool
-isLength = (1 ==).length
-
-isOrder :: [Int] -> Bool
-isOrder = (3 ==).length
-
-fromInts :: [Int] -> Order
-fromInts [s,d,p] = (s,d,p)
+extract ns = extract' lengths orders
+    where lengths = concat $ filter isLength ns
+          orders  = map fromInts $ filter isOrder ns
+          isLength = (1 ==).length
+          isOrder  = (3 ==).length
+          fromInts [s,d,p] = (s,d,p)
+          extract' [] _      = []
+          extract' (n:ns) os = (take n os) : extract' ns (drop n os) 
 
 
 
