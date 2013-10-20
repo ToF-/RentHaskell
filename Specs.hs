@@ -18,13 +18,61 @@ main = hspec $ do
 
     describe "optimize (list)" $ do
         it "when given 1 order gives the order price" $ property $
-            \o -> optimizeL [o] `shouldBe` price o 
+            forAll order $ \o -> optimizeL [o] == price o 
     
         it "when given 2 incompatible orders gives the bigger price" $ property $
-            \(o,p) -> not (compatible o p) ==> optimizeL [o,p] == max (price o) (price p)   
+            forAll incompatibleOrders $ \(o,p) -> optimizeL [o,p] == max (price o) (price p)   
+
+        it "when given 2 compatible orders gives the sum of the prices" $ property $
+            forAll compatibleOrders $ \(o,p) -> optimizeL [o,p] == price o + price p
+
+        it "when given several orders gives the optimal solution" $ do
+            optimizeL [(0,5,10),(3,7,9),(5,4,7),(6,5,8)] `shouldBe` 18
+
+positiveInt :: Gen Int
+positiveInt = do n <- arbitrary
+                 return (1 + abs n) 
+
+aTime :: Gen Int
+aTime = choose (0,1000000)
+
+aPrice :: Gen Int
+aPrice = choose (0,100000)
+
+order :: Gen Order
+order = do startTime <- aTime
+           duration  <- aTime
+           price     <- aPrice
+           return (startTime, duration, price) 
+    
+incompatibleOrders :: Gen (Order, Order)
+incompatibleOrders = do startTime <- aTime
+                        duration  <- aTime
+                        price1    <- aTime
+                        price2    <- aPrice
+                        let order1    = (startTime,   duration+2, price1)
+                            order2    = (startTime+1, duration+1, price2)
+                        return (order1, order2)
+
+compatibleOrders :: Gen (Order, Order)
+compatibleOrders = do startTime <- aTime
+                      duration  <- aTime
+                      price1    <- aTime
+                      price2    <- aPrice
+                      let order1    = (startTime,   duration, price1)
+                          order2    = (startTime+duration, duration, price2)
+                      return (order1, order2)
+
+correct :: Order -> Bool
+correct (s,d,p) = s >=0 && d > 0 && p >=0
+
+testable :: Order -> Order
+testable (s,d,p) = (abs s, 1+abs d, abs p)
 
 compatible :: Order -> Order -> Bool
-compatible (s,d,_) (s',d',_) = (s' >= s+d) || (s >= s'+d') 
+compatible (s,d,_) (s',d',_) = ((s' >= s+d) || (s >= s'+d')) && d > 0 && d' > 0
+
+
 mockOptimizer :: [Order] -> Int
 mockOptimizer os = case length os of
                     4 -> 18
