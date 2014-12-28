@@ -1,6 +1,6 @@
 import Test.Hspec
 import Data.List (sort)
-import Data.Map as Map (insertWith,empty,(!),insert,elems,keys)
+import Data.Map as Map (insertWith,empty,(!),insert,elems,keys,findWithDefault)
 import qualified Data.Map as Map 
 
 testing = True 
@@ -29,17 +29,13 @@ tests = hspec $ do
         it "contains end time points" $ do
             Map.keys (plan os) `shouldContain` [5,8]
 
-        it "contains start time points" $ do
-            Map.keys (plan os) `shouldContain` [0,2,3]
-
         it "maps time points to order ending at that point" $ do
             Map.toList (plan os) `shouldBe` 
-                [(0,[])
-                ,(2,[Order {startTime = 0, endTime = 2, price = 0}])
+                [(2,[Order {startTime = 0, endTime = 2, price = 0}])
                 ,(3,[Order {startTime = 2, endTime = 3, price = 0}])
                 ,(5,[Order {startTime = 0, endTime = 5, price = 10}])
-                ,(8,[Order {startTime = 3, endTime = 8, price = 10}
-                    ,Order {startTime = 2, endTime = 8, price = 12}])]
+                ,(8,[Order {startTime = 2, endTime = 8, price = 12}
+                    ,Order {startTime = 3, endTime = 8, price = 10}])]
         
     describe "profit" $ do
         it "optimizes orders" $ do
@@ -61,22 +57,23 @@ makeOrder s d p = Order s (s+d) p
 type Plan = Map.Map Time [Order] 
 
 plan :: [Order] -> Plan
-plan os = Map.insert firstTime [] $ foldr insertOrder Map.empty $ os ++ nullOrders
+plan = foldr insertOrder empty . withNullOrders . sort 
     where
-    firstTime = startTime (head sortedOrders) 
-    sortedOrders = sort os
-    nullOrders = [Order (startTime o) (startTime o') 0 | (o,o') <- zip sortedOrders (tail sortedOrders)]  
-    insertOrder o p = insertWith (++) (endTime o) [o] p
+    insertOrder o pl = insertWith (++) (endTime o) [o] pl
+    withNullOrders os = os ++ zipWith nullOrder times (tail times) 
+        where 
+        times = map startTime os
+        nullOrder s s' = Order s s' 0
+ 
 
-type Table = Map.Map Time Money
+type Profits = Map.Map Time Money
 
 profit :: [Order] -> Money
 profit os = last $ elems profits
     where
-    profits = foldl calcProfit initial (tail times)
-    initial = insert (head times) 0 empty
-    times = keys plan'
-    plan' = plan os
-    calcProfit table t = insert t best table
-        where 
-        best = maximum $ map (\o -> price o + (table!(startTime o))) $ plan' ! t
+    profits  = foldl ins empty (keys p)
+    p        = plan os
+    ins t k  = insert k best t
+        where
+        best     = maximum (map profit (p!k)) 
+        profit o = price o + (findWithDefault 0 (startTime o) t)
