@@ -1,6 +1,6 @@
 import Test.Hspec
 import Data.List (sort)
-import Data.Map as Map (insertWith,empty,(!),insert,elems,keys,findWithDefault)
+import Data.Map as Map (insertWith,empty,(!),insert,elems,keys,findWithDefault,findMax)
 import qualified Data.Map as Map 
 
 testing = True 
@@ -11,6 +11,11 @@ main = if testing then tests else process
 
 process :: IO ()
 process = putStrLn "18"
+
+os = [makeOrder 0 5 10
+     ,makeOrder 3 7 14
+     ,makeOrder 5 9 7
+     ,makeOrder 6 9 8]        
 
 tests :: IO ()
 tests = hspec $ do
@@ -23,19 +28,23 @@ tests = hspec $ do
             price (makeOrder 3 5 10) `shouldBe` 10
 
     describe "a plan" $ do
-        let os = [makeOrder 3 5 10
-                 ,makeOrder 2 6 12
-                 ,makeOrder 0 5 10]
         it "contains end time points" $ do
-            Map.keys (plan os) `shouldContain` [5,8]
+            Map.keys (plan os) `shouldBe` [3,5,6,10,14,15]
 
         it "maps time points to order ending at that point" $ do
             Map.toList (plan os) `shouldBe` 
-                [(2,[Order {startTime = 0, endTime = 2, price = 0}])
-                ,(3,[Order {startTime = 2, endTime = 3, price = 0}])
-                ,(5,[Order {startTime = 0, endTime = 5, price = 10}])
-                ,(8,[Order {startTime = 2, endTime = 8, price = 12}
-                    ,Order {startTime = 3, endTime = 8, price = 10}])]
+                [(3,[Order {startTime = 0, endTime = 3, price = 0}])
+                ,(5,[Order {startTime = 0, endTime = 5, price = 10}
+                    ,Order {startTime = 3, endTime = 5, price = 0}])
+                ,(6,[Order {startTime = 5, endTime = 6, price = 0}])
+                ,(10,[Order {startTime = 3, endTime = 10, price = 14}])
+                ,(14,[Order {startTime = 5, endTime = 14, price = 7}])
+                ,(15,[Order {startTime = 6, endTime = 15, price = 8}])]
+
+    describe "exploit" $ do
+        it "map time to money" $ do
+            Map.toList (exploit (plan os)) `shouldBe`
+                [(3,0),(5,10),(6,10),(10,14),(14,17),(15,18)]
         
     describe "profit" $ do
         it "optimizes orders" $ do
@@ -65,15 +74,16 @@ plan = foldr insertOrder empty . withNullOrders . sort
         times = map startTime os
         nullOrder s s' = Order s s' 0
  
-
 type Profits = Map.Map Time Money
 
-profit :: [Order] -> Money
-profit os = last $ elems profits
+exploit :: Plan -> Profits
+exploit pl = foldl ins empty (keys pl)
     where
-    profits  = foldl ins empty (keys p)
-    p        = plan os
-    ins t k  = insert k best t
+    ins pr k  = insert k best pr
         where
-        best     = maximum (map profit (p!k)) 
-        profit o = price o + (findWithDefault 0 (startTime o) t)
+        best     = maximum (map profit (pl!k)) 
+        profit o = price o + (findWithDefault 0 (startTime o) pr)
+
+profit :: [Order] -> Money
+profit = money . findMax . exploit . plan
+    where money = snd
