@@ -1,6 +1,6 @@
 import Test.Hspec
 import Data.List (sort)
-import Data.Map as Map (insertWith,empty)
+import Data.Map as Map (insertWith,empty,(!),insert,elems,keys)
 import qualified Data.Map as Map 
 
 testing = True 
@@ -40,7 +40,15 @@ tests = hspec $ do
                 ,(5,[Order {startTime = 0, endTime = 5, price = 10}])
                 ,(8,[Order {startTime = 3, endTime = 8, price = 10}
                     ,Order {startTime = 2, endTime = 8, price = 12}])]
-            
+        
+    describe "profit" $ do
+        it "optimizes orders" $ do
+            let os = [makeOrder 0 5 10
+                     ,makeOrder 3 7 14
+                     ,makeOrder 5 9 7
+                     ,makeOrder 6 9 8]        
+            profit os `shouldBe` 18
+    
 
 type Time = Int
 type Money = Int
@@ -52,13 +60,23 @@ makeOrder s d p = Order s (s+d) p
 
 type Plan = Map.Map Time [Order] 
 
-
 plan :: [Order] -> Plan
 plan os = Map.insert firstTime [] $ foldr insertOrder Map.empty $ os ++ nullOrders
     where
     firstTime = startTime (head sortedOrders) 
     sortedOrders = sort os
     nullOrders = [Order (startTime o) (startTime o') 0 | (o,o') <- zip sortedOrders (tail sortedOrders)]  
-    insertOrder o p = Map.insertWith (++) (endTime o) [o] p
-            
+    insertOrder o p = insertWith (++) (endTime o) [o] p
 
+type Table = Map.Map Time Money
+
+profit :: [Order] -> Money
+profit os = last $ elems profits
+    where
+    profits = foldl calcProfit initial (tail times)
+    initial = insert (head times) 0 empty
+    times = keys plan'
+    plan' = plan os
+    calcProfit table t = insert t best table
+        where 
+        best = maximum $ map (\o -> price o + (table!(startTime o))) $ plan' ! t
