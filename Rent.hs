@@ -1,6 +1,6 @@
 import Test.Hspec
 import Data.List (sort)
-import Data.Map as Map (insertWith,empty,(!),insert,elems,keys,findWithDefault,findMax)
+import Data.Map as Map (Map,insertWith,empty,(!),insert,elems,keys,findWithDefault,findMax)
 import qualified Data.Map as Map 
 
 testing = True 
@@ -63,7 +63,7 @@ data Order = Order { startTime :: Time, endTime :: Time, price :: Money }
 makeOrder :: Time -> Time -> Money -> Order
 makeOrder s d p = Order s (s+d) p 
 
-type Plan = Map.Map Time [Order] 
+type Plan = Map Time [Order] 
 
 plan :: [Order] -> Plan
 plan = foldr insertOrder empty . withNullOrders . sort 
@@ -74,7 +74,7 @@ plan = foldr insertOrder empty . withNullOrders . sort
         times = map startTime os
         nullOrder s s' = Order s s' 0
  
-type Profits = Map.Map Time Money
+type Profits = Map Time Money
 
 exploit :: Plan -> Profits
 exploit pl = Map.map (maximum . map findProfit) pl
