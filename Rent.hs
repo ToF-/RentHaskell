@@ -55,15 +55,18 @@ tests = hspec $ do
             profit os `shouldBe` 18
     
 
-type Time = Int
+type Time  = Int
 type Money = Int
-data Order = Order { startTime :: Time, endTime :: Time, price :: Money }
+data Order = Order { startTime :: Time, 
+                     endTime   :: Time, 
+                     price     :: Money }
     deriving (Eq, Ord, Show)
+type Plan    = Map Time [Order] 
+type Profits = Map Time Money
 
-makeOrder :: Time -> Time -> Money -> Order
-makeOrder s d p = Order s (s+d) p 
-
-type Plan = Map Time [Order] 
+profit :: [Order] -> Money
+profit = money . findMax . exploit . plan
+    where money = snd
 
 plan :: [Order] -> Plan
 plan = foldr insertOrder empty . withNullOrders . sort 
@@ -73,15 +76,13 @@ plan = foldr insertOrder empty . withNullOrders . sort
         where 
         times = map startTime os
         nullOrder s s' = Order s s' 0
- 
-type Profits = Map Time Money
 
 exploit :: Plan -> Profits
 exploit pl = Map.map (maximum . map findProfit) pl
     where
-    findProfit o = findProfitAt (startTime o) + price o
+    findProfit o   = findProfitAt (startTime o) + (price o)
     findProfitAt t = findWithDefault 0 t (exploit pl)
 
-profit :: [Order] -> Money
-profit = money . findMax . exploit . plan
-    where money = snd
+makeOrder :: Time -> Time -> Money -> Order
+makeOrder s d p = Order s (s+d) p 
+
