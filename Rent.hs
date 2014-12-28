@@ -77,12 +77,10 @@ plan = foldr insertOrder empty . withNullOrders . sort
 type Profits = Map.Map Time Money
 
 exploit :: Plan -> Profits
-exploit pl = foldl ins empty (keys pl)
+exploit pl = Map.map (maximum . map findProfit) pl
     where
-    ins pr k  = insert k best pr
-        where
-        best     = maximum (map profit (pl!k)) 
-        profit o = price o + (findWithDefault 0 (startTime o) pr)
+    findProfit o = findProfitAt (startTime o) + price o
+    findProfitAt t = findWithDefault 0 t (exploit pl)
 
 profit :: [Order] -> Money
 profit = money . findMax . exploit . plan
