@@ -3,7 +3,7 @@ import Data.List (sort)
 import Data.Map as Map (Map,insertWith,empty,(!),insert,elems,keys,findWithDefault,findMax)
 import qualified Data.Map as Map 
 
-testing = False 
+testing = True 
 -- True: pass tests. False: run program
 -- passing an arg won't do because hspec wants to consume the arg too
 
@@ -45,10 +45,6 @@ tests = hspec $ do
         
     describe "profit" $ do
         it "optimizes orders" $ do
-            let os = [makeOrder 0 5 10
-                     ,makeOrder 3 7 14
-                     ,makeOrder 5 9 7
-                     ,makeOrder 6 9 8]        
             profit os `shouldBe` 18
    
     describe "solve" $ do
