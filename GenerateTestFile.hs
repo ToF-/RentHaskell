@@ -10,8 +10,14 @@ import Control.Monad (replicateM)
 
 main = do
     args <- getArgs 
-    d <- randomTestData (args == ["M"])
+    let size = sizeFromArgs args
+    d <- randomTestData (args == ["M"]) size
     putStr $ unlines $ showTestData d
+
+sizeFromArgs :: [String] -> (Int,Int)
+sizeFromArgs [] = (30, 10000)
+sizeFromArgs ["M"] = (0,0)
+sizeFromArgs ["S",n,m] = (read n,read m)
 
 {--
 The start time of the order st (0 ≤ st < 1000000),
@@ -37,16 +43,16 @@ randomOrder = do
     p <- randomPrice
     return (s,d,p)
 
-randomProblem :: Bool -> IO Problem
-randomProblem maxed = do
-    n <- if maxed then return 10000 else randomInt (1,10001)
+randomProblem :: Bool -> Int -> IO Problem
+randomProblem maxed maxOrders = do
+    n <- if maxed then return 10000 else randomInt (1,maxOrders)
     os <- replicateM n randomOrder
     return (n,os)
 
-randomTestData :: Bool -> IO TestData
-randomTestData maxed = do 
-    n <- if maxed then return 30 else randomInt (1,31)
-    ps <- replicateM n $ randomProblem maxed
+randomTestData :: Bool -> (Int,Int) -> IO TestData
+randomTestData maxed (nbTests,maxOrders) = do 
+    n <- if maxed then return 30 else randomInt (1,nbTests)
+    ps <- replicateM n $ randomProblem maxed maxOrders
     return (n,ps)
 
 showOrder :: Order -> String
