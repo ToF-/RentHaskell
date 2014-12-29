@@ -1,6 +1,5 @@
-module Rent
-
-where
+-- be sure to have imported the content of Module Rent before running this program.
+--
 import Data.List (sort)
 import Data.Map as Map (Map,insertWith,empty,(!),insert,elems,keys,findWithDefault,findMax)
 import qualified Data.Map as Map 
@@ -52,3 +51,4 @@ exploit pl = Map.map (maximum . map findProfit) pl
 makeOrder :: Time -> Time -> Money -> Order
 makeOrder s d p = Order s (s+d) p 
 
+main = interact process
