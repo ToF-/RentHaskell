@@ -26,13 +26,13 @@ profit = money . findMax . exploit . plan
     where money = snd
 
 plan :: [Order] -> Plan
-plan os = foldr insertOrder plan' nullOrders 
+plan os = foldl insertOrder plan' nullOrders 
     where
-    plan'      = foldr insertOrder empty os
+    plan'      = foldl insertOrder empty os
     nullOrders = zipWith nullOrder times (tail times) 
     times      = nub $ sort $ concatMap (\o -> [startTime o, endTime o]) os  
     nullOrder s s'   = Order s s' 0
-    insertOrder o pl = insertWith (++) (endTime o) [o] pl
+    insertOrder pl o = insertWith (++) (endTime o) [o] pl
 
 exploit :: Plan -> Profits
 exploit pl = Map.map (maximum . map findProfit) pl
