@@ -1,47 +1,44 @@
 module Rent
 where
 -- concat the code below to Spoj.hs --
-import Data.List (sort,nub)
-import Data.Map as Map (Map,insertWith,empty,(!),insert,elems,keys,findWithDefault,findMax)
-import qualified Data.Map as Map 
 
+import Data.Map (insertWith, Map, empty)
+import Data.List (sort)
+
+type Order = (Time, Time, Money)
 type Time  = Int
 type Money = Int
-data Order = Order { startTime :: Time, 
-                     endTime   :: Time, 
-                     price     :: Money }
-    deriving (Eq, Ord, Show)
-type Plan    = Map Time [Order] 
-type Profits = Map Time Money
 
-process :: String -> String
-process  = unlines . map show . solve . tail . map (map read) . map words . lines  
+order :: Time -> Time -> Money -> Order
+order s d p = (s,d,p)
 
-solve :: [[Int]] -> [Int]
-solve [] = []
-solve ([n]:xs) = solveProblem (take n xs) : solve (drop n xs)
+start :: Order -> Time
+start (s,_,_) = s
+
+end :: Order -> Time
+end (s,d,_) = s + d
+
+price :: Order -> Money
+price (_,_,p) = p
+
+type Plan = Map Time [(Money,Time)]
+
+plan :: [Order] -> Plan
+plan os = foldr insertOrder initial os
     where
-    solveProblem = profit . map (\[s,d,p] -> makeOrder s d p) 
+    insertOrder o = insertWith (++) (end o) [(price o, start o)]
+    initial       = foldr insertOrder empty (nullOrders os)
+   
+nullOrders :: [Order] -> [Order]
+nullOrders os = zipWith (\t t' -> order t (t'-t) 0) ts (tail ts) 
+    where ts = times os
 
-profit :: [Order] -> Money
-profit = money . findMax . exploit . plan
-    where money = snd
-
-plan :: [Order] -> Plan
-plan os = foldl insertOrder plan' nullOrders 
+times :: [Order] -> [Time]
+times os = uniq $ sort $ (map start os) ++ (map end os) 
     where
-    plan'      = foldl insertOrder empty os
-    nullOrders = zipWith nullOrder times (tail times) 
-    times      = nub $ sort $ concatMap (\o -> [startTime o, endTime o]) os  
-    nullOrder s s'   = Order s s' 0
-    insertOrder pl o = insertWith (++) (endTime o) [o] pl
-
-exploit :: Plan -> Profits
-exploit pl = Map.map (maximum . map findProfit) pl
-    where
-    findProfit o   = findProfitAt (startTime o) + (price o)
-    findProfitAt t = findWithDefault 0 t (exploit pl)
-
-makeOrder :: Time -> Time -> Money -> Order
-makeOrder s d p = Order s (s+d) p 
+    uniq []  = []
+    uniq [x] = [x]
+    uniq (x:y:xs)
+        | x == y    = x:uniq xs
+        | otherwise = x:uniq (y:xs)
 
