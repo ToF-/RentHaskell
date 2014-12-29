@@ -1,15 +1,7 @@
--- be sure to have imported the content of Module Rent before running this program.
---
-import Data.List (sort)
+-- concat the code below to Spoj.hs --
+import Data.List (sort,nub)
 import Data.Map as Map (Map,insertWith,empty,(!),insert,elems,keys,findWithDefault,findMax)
 import qualified Data.Map as Map 
-
-
-os = [makeOrder 0 5 10
-     ,makeOrder 3 7 14
-     ,makeOrder 5 9 7
-     ,makeOrder 6 9 8]        
-
 
 type Time  = Int
 type Money = Int
@@ -34,13 +26,13 @@ profit = money . findMax . exploit . plan
     where money = snd
 
 plan :: [Order] -> Plan
-plan = foldr insertOrder empty . withNullOrders . sort 
+plan os = foldr insertOrder plan' nullOrders 
     where
+    plan'      = foldr insertOrder empty os
+    nullOrders = zipWith nullOrder times (tail times) 
+    times      = nub $ sort $ concatMap (\o -> [startTime o, endTime o]) os  
+    nullOrder s s'   = Order s s' 0
     insertOrder o pl = insertWith (++) (endTime o) [o] pl
-    withNullOrders os = os ++ zipWith nullOrder times (tail times) 
-        where 
-        times = map startTime os
-        nullOrder s s' = Order s s' 0
 
 exploit :: Plan -> Profits
 exploit pl = Map.map (maximum . map findProfit) pl

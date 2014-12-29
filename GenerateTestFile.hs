@@ -1,4 +1,5 @@
 import System.Random (getStdRandom, randomR)
+import Text.Printf (printf)
 import System.Environment (getArgs)
 import Control.Monad (replicateM)
 
@@ -56,7 +57,7 @@ randomTestData maxed (nbTests,maxOrders) = do
     return (n,ps)
 
 showOrder :: Order -> String
-showOrder (s,d,p) = show s ++" " ++ show d ++ " " ++ show p
+showOrder (s,d,p) = printf "%07d %07d %06d" s d p
 
 showProblem :: Problem -> [String]
 showProblem (n,os) = show n : map showOrder os
