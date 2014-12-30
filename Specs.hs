@@ -1,6 +1,8 @@
 import Test.Hspec
 import Rent
-import Data.Map 
+import qualified Data.Map as Map 
+import Data.Map (toList,(!))
+import Data.List
 
 main = hspec $ do
     describe "order values" $ do
@@ -69,15 +71,19 @@ main = hspec $ do
                      ,order 6 9 8]
             profit os `shouldBe` 18    
 
-    describe "solve" $ do
-        it "should solve rent problems given as list of lists integers" $ do
-            let ls = [[2]
-                     ,[1]
-                     ,[0,5,10]
-                     ,[2]
-                     ,[0,5,10]
-                     ,[3,7,14]]
-            solutions ls `shouldBe` [10,14] 
-            
+    context "process" $ do
+        let ls = [[2]
+                 ,[1]
+                 ,[0,5,10]
+                 ,[2]
+                 ,[0,5,10]
+                 ,[3,7,14]]
+        describe "solutions" $ do
+            it "should solve rent problems given as list of lists integers" $ do
+                solutions ls `shouldBe` [10,14] 
 
+        describe "process" $ do
+            it "should read input and output solutions" $ do
+                let s = "2 \n 1 \n 0 5 10 \n 2 \n 0 5 10 \n 3 7 14"
+                process s `shouldBe` "10\n14\n"
                                     

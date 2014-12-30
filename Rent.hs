@@ -83,3 +83,5 @@ solutions = solutions' . tail
     solve :: [[Int]] -> Int
     solve = profit . map (\[s,d,p] -> order s d p)
 
+process :: String -> String
+process = unlines . map show . solutions . map (map read . words) . lines
