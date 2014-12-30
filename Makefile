@@ -9,7 +9,7 @@ clean:
 	rm Spoj
 	rm *.txt
 
-large: largedata.txt 
+large:  
 	runghc GenerateTestFile M >largedata.txt	
 		
 perf: Spoj 
