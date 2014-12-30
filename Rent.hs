@@ -3,7 +3,7 @@ where
 -- concat the code below to Spoj.hs --
 
 import qualified Data.Map as Map
-import Data.Map (insertWith, Map, empty, keys, insert, (!), findMin, toList, lookup)
+import Data.Map (insertWith, Map, empty, keys, insert, (!), findMax, findMin, toList, lookup)
 import Data.List (sort)
 
 type Order = (Time, Time, Money)
@@ -69,3 +69,6 @@ profits pl = foldl (insertProfit pl) initial (toList pl)
 
     value :: Profits -> (Money,Time) -> Money
     value pr (m,t) = m + pr!t 
+
+profit :: [Order] -> Money
+profit = snd . findMax . profits . plan

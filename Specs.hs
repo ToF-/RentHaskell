@@ -60,6 +60,14 @@ main = hspec $ do
                                    ,order 5 9 7
                                    ,order 6 9 8]
             toList t `shouldBe` [(0,0),(3,0),(5,10),(6,10),(10,14),(14,17),(15,18)]
+
+    describe "profit" $ do
+        it "should be the max value for a plan" $ do
+            let os = [order 0 5 10
+                     ,order 3 7 14
+                     ,order 5 9 7
+                     ,order 6 9 8]
+            profit os `shouldBe` 18    
             
 
                                     
