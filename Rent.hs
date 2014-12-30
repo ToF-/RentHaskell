@@ -55,25 +55,23 @@ minStartTime = minimum . (map time) . snd . findMin
 
 type Profits = Map Time Money
 
-profits :: Plan -> Profits
-profits pl = foldl (insertProfit pl) initial (toList pl)
+profits :: Plan -> (Profits, Money)
+profits pl = foldl insertProfit initial (toList pl)
     where
-    insertProfit :: Plan -> Profits -> (Time,[(Money,Time)]) -> Profits
-    insertProfit pl pr (t,vs) = insert t (maxValue pr vs) pr
+    initial :: (Profits, Money)
+    initial = (insert (minStartTime pl) 0 empty,0)
 
-    initial :: Profits
-    initial = insert (minStartTime pl) 0 empty
+    insertProfit :: (Profits,Money) -> (Time,[(Money,Time)]) -> (Profits,Money)
+    insertProfit (pr,m) (t,vs) = (insert t (maxValue vs) pr, max m (maxValue vs))
+        where
+        maxValue :: [(Money,Time)] -> Money
+        maxValue = maximum . map value
 
-    maxValue :: Profits -> [(Money,Time)] -> Money
-    maxValue pr = maximum . map (value pr)
-
-    value :: Profits -> (Money,Time) -> Money
-    value pr (m,t) = case Map.lookup t pr of
-                        Just v  -> m + v
-                        Nothing -> error $ "key:" ++ show (t) ++ " not found" 
+        value :: (Money,Time) -> Money
+        value (m,t) = m + pr!t
 
 profit :: [Order] -> Money
-profit = snd . findMax . profits . plan
+profit = snd . profits . plan
 
 solutions :: [[Int]] -> [Int]
 solutions = solutions' . tail 

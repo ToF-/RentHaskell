@@ -53,17 +53,17 @@ main = hspec $ do
 
     describe "a profit table" $ do
         it "should map time to money" $ do
-            let t = profits $ plan [order 0 5 10]
+            let t = fst $ profits $ plan [order 0 5 10]
             t!5 `shouldBe` 10
 
         it "should contain best profit as its max element" $ do
-            let t = profits $ plan [order 0 5 10]
+            let t = fst $ profits $ plan [order 0 5 10]
             toList t `shouldBe` [(0,0),(5,10)]
 
-            let t = profits $ plan [order 0 5 10, order 3 2 14]
+            let t = fst $ profits $ plan [order 0 5 10, order 3 2 14]
             toList t `shouldBe` [(0,0),(3,0),(5,14)]
 
-            let t = profits $ plan [order 0 5 10
+            let t = fst $ profits $ plan [order 0 5 10
                                    ,order 3 7 14
                                    ,order 5 9 7
                                    ,order 6 9 8]
