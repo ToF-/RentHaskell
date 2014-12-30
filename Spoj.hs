@@ -1,7 +1,7 @@
 -- concat the code below to Spoj.hs --
 
 import qualified Data.Map as Map
-import Data.Map (insertWith, Map, empty, keys, insert, (!), findMin, toList, lookup)
+import Data.Map (insertWith, Map, empty, keys, insert, (!), findMax, findMin, toList, lookup)
 import Data.List (sort)
 
 type Order = (Time, Time, Money)
@@ -67,4 +67,20 @@ profits pl = foldl (insertProfit pl) initial (toList pl)
 
     value :: Profits -> (Money,Time) -> Money
     value pr (m,t) = m + pr!t 
+
+profit :: [Order] -> Money
+profit = snd . findMax . profits . plan
+
+solutions :: [[Int]] -> [Int]
+solutions = solutions' . tail 
+    where
+    solutions' :: [[Int]] -> [Int]
+    solutions' [] = []
+    solutions' ([n]:ns) = solve (take n ns) : solutions' (drop n ns) 
+    
+    solve :: [[Int]] -> Int
+    solve = profit . map (\[s,d,p] -> order s d p)
+
+process :: String -> String
+process = unlines . map show . solutions . map (map read . words) . lines
 main = interact process
