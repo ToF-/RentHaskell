@@ -18,12 +18,16 @@ main = hspec $ do
     describe "a plan" $ do
         it "should map time to order ending at that time" $ do
             let p = plan [order 0 5 10]
-            p!5 `shouldContain` [(10,0)]
+            toList p `shouldBe` [(0,[]),(5,[(10,0)])]
 
         it "should map several orders" $ do
             let p = plan [order 0 5 10, order 3 7 14]
             p!5  `shouldContain` [(10,0)]
             p!10 `shouldContain` [(14,3)]
+
+        it "should map several orders on sames times" $ do
+            let p = plan [order 0 5 10, order 0 5 11]
+            toList p `shouldBe` [(0,[]),(5,[(10,0),(11,0)])]
 
 
         it "should map start times even if not order ending at that time" $ do
@@ -37,6 +41,7 @@ main = hspec $ do
     describe "a profit table" $ do
         it "should map time to money" $ do
             let t = fst $ profits $ plan [order 0 5 10]
+            t!0 `shouldBe` 0
             t!5 `shouldBe` 10
             toList t `shouldBe` [(0,0),(5,10)]
 
@@ -85,4 +90,6 @@ main = hspec $ do
             it "should read input and output solutions" $ do
                 let s = "2 \n 1 \n 0 5 10 \n 2 \n 0 5 10 \n 3 7 14"
                 process s `shouldBe` "10\n14\n"
+
+
                                     

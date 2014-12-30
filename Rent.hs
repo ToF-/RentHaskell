@@ -3,7 +3,7 @@ where
 -- concat the code below to Spoj.hs --
 
 import qualified Data.Map as Map
-import Data.Map (insertWith, Map, empty, keys, insert, (!), findMax, findMin, toList, lookup)
+import Data.Map (insertWith', assocs,Map, empty, keys, insert, (!), findMax, findMin, toList, lookup)
 import Data.List (sort)
 
 type Order = (Time, Time, Money)
@@ -22,20 +22,21 @@ end (s,d,_) = s + d
 price :: Order -> Money
 price (_,_,p) = p
 
-type Plan = Map Time [(Money,Time)]
+type Bid  = (Money,Time)
+type Plan = Map Time [Bid]
 
-time :: (Money,Time) -> Time
+time :: Bid -> Time
 time = snd
 
-money :: (Money, Time) -> Money
+money :: Bid -> Money
 money = fst 
 
 plan :: [Order] -> Plan
 plan os = foldr insertOrder initial os
     where
-    insertOrder o = insertWith (++) (end o) [(price o, start o)]
+    insertOrder o = insertWith' (++) (end o) [(price o, start o)]
     initial       = foldr insertOrderStart empty os
-    insertOrderStart o = insertWith (++) (start o) []
+    insertOrderStart o = insertWith' (++) (start o) []
 
 minStartTime :: Plan -> Time
 minStartTime = fst . findMin  
@@ -44,24 +45,24 @@ minStartTime = fst . findMin
 type Profits = (Map Time Money, Money)
 
 profits :: Plan -> Profits
-profits pl = foldl insertProfit initial (toList pl)
+profits pl = foldr insertProfit initial (tail $ assocs pl)
     where
     initial :: Profits
     initial = (insert (minStartTime pl) 0 empty,0)
 
-    insertProfit :: Profits -> (Time,[(Money,Time)]) -> Profits
-    insertProfit (pr,m) (t,vs) = (insert t m' pr, m')
+    insertProfit :: (Time,[Bid]) -> Profits -> Profits
+    insertProfit (t,vs) (pr,m) = (insert t m' pr, m')
         where
         m' = maxValue vs
 
-        maxValue :: [(Money,Time)] -> Money
+        maxValue :: [Bid] -> Money
         maxValue [] = m
-        maxValue os = (maximum . map value) os 
+        maxValue bs = (maximum . map value) bs 
 
-        value :: (Money,Time) -> Money
-        value (m,t) = m + case Map.lookup t pr of
-                            Just v -> v
-                            Nothing -> 0 
+        value :: Bid -> Money
+        value b = money b + case Map.lookup (time b) pr of
+                                Just v -> v
+                                Nothing -> 0 
 
 profit :: [Order] -> Money
 profit = snd . profits . plan
