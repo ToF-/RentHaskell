@@ -38,3 +38,28 @@ main = hspec $ do
             p!5 `shouldContain` [(0, 3)]
             p!7 `shouldContain` [(0, 5)]
             p!10`shouldContain` [(0, 7)]
+
+        it "should hold the minimal start time" $ do
+            let p = plan [order 0 5 10, order (-3) 7 14]
+            minStartTime p `shouldBe` (-3)
+
+    describe "a profit table" $ do
+        it "should map time to money" $ do
+            let t = profits $ plan [order 0 5 10]
+            t!5 `shouldBe` 10
+
+        it "should contain best profit as its max element" $ do
+            let t = profits $ plan [order 0 5 10]
+            toList t `shouldBe` [(0,0),(5,10)]
+
+            let t = profits $ plan [order 0 5 10, order 3 2 14]
+            toList t `shouldBe` [(0,0),(3,0),(5,14)]
+
+            let t = profits $ plan [order 0 5 10
+                                   ,order 3 7 14
+                                   ,order 5 9 7
+                                   ,order 6 9 8]
+            toList t `shouldBe` [(0,0),(3,0),(5,10),(6,10),(10,14),(14,17),(15,18)]
+            
+
+                                    

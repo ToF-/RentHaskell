@@ -2,7 +2,8 @@ module Rent
 where
 -- concat the code below to Spoj.hs --
 
-import Data.Map (insertWith, Map, empty)
+import qualified Data.Map as Map
+import Data.Map (insertWith, Map, empty, keys, insert, (!), findMin, toList, lookup)
 import Data.List (sort)
 
 type Order = (Time, Time, Money)
@@ -23,6 +24,12 @@ price (_,_,p) = p
 
 type Plan = Map Time [(Money,Time)]
 
+time :: (Money,Time) -> Time
+time = snd
+
+money :: (Money, Time) -> Money
+money = fst 
+
 plan :: [Order] -> Plan
 plan os = foldr insertOrder initial os
     where
@@ -42,3 +49,23 @@ times os = uniq $ sort $ (map start os) ++ (map end os)
         | x == y    = x:uniq xs
         | otherwise = x:uniq (y:xs)
 
+minStartTime :: Plan -> Time
+minStartTime = minimum . (map time) . snd . findMin  
+
+
+type Profits = Map Time Money
+
+profits :: Plan -> Profits
+profits pl = foldl (insertProfit pl) initial (toList pl)
+    where
+    insertProfit :: Plan -> Profits -> (Time,[(Money,Time)]) -> Profits
+    insertProfit pl pr (t,vs) = insert t (maxValue pr vs) pr
+
+    initial :: Profits
+    initial = insert (minStartTime pl) 0 empty
+
+    maxValue :: Profits -> [(Money,Time)] -> Money
+    maxValue pr = maximum . map (value pr)
+
+    value :: Profits -> (Money,Time) -> Money
+    value pr (m,t) = m + pr!t 
