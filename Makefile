@@ -7,3 +7,4 @@ clean:
 	rm *.hi
 	rm *.o
 	rm Spoj
+	rm *.txt
