@@ -72,3 +72,14 @@ profits pl = foldl (insertProfit pl) initial (toList pl)
 
 profit :: [Order] -> Money
 profit = snd . findMax . profits . plan
+
+solutions :: [[Int]] -> [Int]
+solutions = solutions' . tail 
+    where
+    solutions' :: [[Int]] -> [Int]
+    solutions' [] = []
+    solutions' ([n]:ns) = solve (take n ns) : solutions' (drop n ns) 
+    
+    solve :: [[Int]] -> Int
+    solve = profit . map (\[s,d,p] -> order s d p)
+

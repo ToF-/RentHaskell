@@ -68,6 +68,16 @@ main = hspec $ do
                      ,order 5 9 7
                      ,order 6 9 8]
             profit os `shouldBe` 18    
+
+    describe "solve" $ do
+        it "should solve rent problems given as list of lists integers" $ do
+            let ls = [[2]
+                     ,[1]
+                     ,[0,5,10]
+                     ,[2]
+                     ,[0,5,10]
+                     ,[3,7,14]]
+            solutions ls `shouldBe` [10,14] 
             
 
                                     
