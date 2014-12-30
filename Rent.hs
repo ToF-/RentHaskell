@@ -46,7 +46,7 @@ times os = uniq $ sort $ (map start os) ++ (map end os)
     uniq []  = []
     uniq [x] = [x]
     uniq (x:y:xs)
-        | x == y    = x:uniq xs
+        | x == y    = uniq (y:xs)
         | otherwise = x:uniq (y:xs)
 
 minStartTime :: Plan -> Time
@@ -68,7 +68,9 @@ profits pl = foldl (insertProfit pl) initial (toList pl)
     maxValue pr = maximum . map (value pr)
 
     value :: Profits -> (Money,Time) -> Money
-    value pr (m,t) = m + pr!t 
+    value pr (m,t) = case Map.lookup t pr of
+                        Just v  -> m + v
+                        Nothing -> error $ "key:" ++ show (t) ++ " not found" 
 
 profit :: [Order] -> Money
 profit = snd . findMax . profits . plan

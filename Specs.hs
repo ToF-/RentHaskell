@@ -19,6 +19,12 @@ main = hspec $ do
         it "should be all the distinct start and end time" $ do
             let os = [order 0 5 10, order 3 7 14, order 7 3 7]
             times os `shouldBe` [0,3,5,7,10]
+        it "should not include duplicates" $ do
+            let os = [order 0 3 10
+                     ,order 1 4 10
+                     ,order 1 5 10
+                     ,order 1 6 10]
+            times os `shouldBe` [0,1,3,5,6,7]
             
     describe "null orders" $ do
         it "should link all times from a list of orders" $ do
@@ -62,6 +68,7 @@ main = hspec $ do
                                    ,order 5 9 7
                                    ,order 6 9 8]
             toList t `shouldBe` [(0,0),(3,0),(5,10),(6,10),(10,14),(14,17),(15,18)]
+
 
     describe "profit" $ do
         it "should be the max value for a plan" $ do
