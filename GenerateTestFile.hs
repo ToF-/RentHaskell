@@ -31,6 +31,7 @@ randomInt :: (Int, Int) -> IO Int
 randomInt = getStdRandom . randomR
 
 randomTime = randomInt (0, 1000000)
+randomDuration = randomInt (1, 1000000)
 randomPrice = randomInt (1, 100000)
 
 type Order = (Int, Int, Int)
@@ -40,7 +41,7 @@ type TestData = (Int, [Problem])
 randomOrder :: IO Order 
 randomOrder = do
     s <- randomTime
-    d <- randomTime
+    d <- randomDuration
     p <- randomPrice
     return (s,d,p)
 

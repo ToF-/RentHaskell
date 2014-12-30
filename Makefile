@@ -8,3 +8,9 @@ clean:
 	rm *.o
 	rm Spoj
 	rm *.txt
+
+large: largedata.txt 
+	runghc GenerateTestFile M >largedata.txt	
+		
+perf: Spoj 
+	( time ./Spoj <largedata.txt ) 2> results.md 
