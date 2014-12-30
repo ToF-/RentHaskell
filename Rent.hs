@@ -34,41 +34,34 @@ plan :: [Order] -> Plan
 plan os = foldr insertOrder initial os
     where
     insertOrder o = insertWith (++) (end o) [(price o, start o)]
-    initial       = foldr insertOrder empty (nullOrders os)
-   
-nullOrders :: [Order] -> [Order]
-nullOrders os = zipWith (\t t' -> order t (t'-t) 0) ts (tail ts) 
-    where ts = times os
-
-times :: [Order] -> [Time]
-times os = uniq $ sort $ (map start os) ++ (map end os) 
-    where
-    uniq []  = []
-    uniq [x] = [x]
-    uniq (x:y:xs)
-        | x == y    = uniq (y:xs)
-        | otherwise = x:uniq (y:xs)
+    initial       = foldr insertOrderStart empty os
+    insertOrderStart o = insertWith (++) (start o) []
 
 minStartTime :: Plan -> Time
-minStartTime = minimum . (map time) . snd . findMin  
+minStartTime = fst . findMin  
 
 
-type Profits = Map Time Money
+type Profits = (Map Time Money, Money)
 
-profits :: Plan -> (Profits, Money)
+profits :: Plan -> Profits
 profits pl = foldl insertProfit initial (toList pl)
     where
-    initial :: (Profits, Money)
+    initial :: Profits
     initial = (insert (minStartTime pl) 0 empty,0)
 
-    insertProfit :: (Profits,Money) -> (Time,[(Money,Time)]) -> (Profits,Money)
-    insertProfit (pr,m) (t,vs) = (insert t (maxValue vs) pr, max m (maxValue vs))
+    insertProfit :: Profits -> (Time,[(Money,Time)]) -> Profits
+    insertProfit (pr,m) (t,vs) = (insert t m' pr, m')
         where
+        m' = maxValue vs
+
         maxValue :: [(Money,Time)] -> Money
-        maxValue = maximum . map value
+        maxValue [] = m
+        maxValue os = (maximum . map value) os 
 
         value :: (Money,Time) -> Money
-        value (m,t) = m + pr!t
+        value (m,t) = m + case Map.lookup t pr of
+                            Just v -> v
+                            Nothing -> 0 
 
 profit :: [Order] -> Money
 profit = snd . profits . plan
