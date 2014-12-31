@@ -77,4 +77,3 @@ solutions = solutions' . tail
 process :: String -> String
 process = unlines . map show . solutions . map (map read . words) . lines
 
-test = [order 0 5 100,order 3 7 140,order 5 9 70,order 6 9 80]
