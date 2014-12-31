@@ -1,7 +1,7 @@
 -- concat the code below to Spoj.hs --
 
 import qualified Data.Map as Map
-import Data.Map (insertWith, Map, empty, keys, insert, (!), findMax, findMin, toList, lookup)
+import Data.Map (insertWith, findWithDefault, assocs,Map, empty, keys, insert, (!), findMax, findMin, toList, lookup)
 import Data.List (sort)
 
 type Order = (Time, Time, Money)
@@ -20,12 +20,13 @@ end (s,d,_) = s + d
 price :: Order -> Money
 price (_,_,p) = p
 
-type Plan = Map Time [(Money,Time)]
+type Bid  = (Money,Time)
+type Plan = Map Time [Bid]
 
-time :: (Money,Time) -> Time
+time :: Bid -> Time
 time = snd
 
-money :: (Money, Time) -> Money
+money :: Bid -> Money
 money = fst 
 
 plan :: [Order] -> Plan
@@ -42,24 +43,21 @@ minStartTime = fst . findMin
 type Profits = (Map Time Money, Money)
 
 profits :: Plan -> Profits
-profits pl = foldl insertProfit initial (toList pl)
+profits pl = foldl insertProfit initial (tail $ assocs pl)
     where
     initial :: Profits
     initial = (insert (minStartTime pl) 0 empty,0)
 
-    insertProfit :: Profits -> (Time,[(Money,Time)]) -> Profits
-    insertProfit (pr,m) (t,vs) = (insert t m' pr, m')
+    insertProfit :: Profits -> (Time,[Bid]) -> Profits
+    insertProfit (pr,m) (t,bs) = (insert t newValue pr, newValue)
         where
-        m' = maxValue vs
+        newValue = max m $ maxValue bs 
 
-        maxValue :: [(Money,Time)] -> Money
-        maxValue [] = m
-        maxValue os = (maximum . map value) os 
+        maxValue [] = 0
+        maxValue xs = (maximum . map value) xs 
 
-        value :: (Money,Time) -> Money
-        value (m,t) = m + case Map.lookup t pr of
-                            Just v -> v
-                            Nothing -> 0 
+        value :: Bid -> Money
+        value b = money b + findWithDefault 0 (time b) pr
 
 profit :: [Order] -> Money
 profit = snd . profits . plan
@@ -76,4 +74,6 @@ solutions = solutions' . tail
 
 process :: String -> String
 process = unlines . map show . solutions . map (map read . words) . lines
+
+test = [order 0 5 100,order 3 7 140,order 5 9 70,order 6 9 80]
 main = interact process
