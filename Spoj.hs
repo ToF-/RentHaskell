@@ -51,10 +51,7 @@ profits pl = foldl insertProfit initial (tail $ assocs pl)
     insertProfit :: Profits -> (Time,[Bid]) -> Profits
     insertProfit (pr,m) (t,bs) = (insert t newValue pr, newValue)
         where
-        newValue = max m $ maxValue bs 
-
-        maxValue [] = 0
-        maxValue xs = (maximum . map value) xs 
+        newValue = maximum $ m : map value bs
 
         value :: Bid -> Money
         value b = money b + findWithDefault 0 (time b) pr
