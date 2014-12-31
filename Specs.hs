@@ -56,10 +56,7 @@ main = hspec $ do
 
     describe "profit" $ do
         it "should be the max value for a plan" $ do
-            let os = [order 0 5 100
-                     ,order 3 7 140
-                     ,order 5 9 70
-                     ,order 6 9 80]
+            let os = [order 0 5 100,order 3 7 140,order 5 9 70,order 6 9 80]
             profit os `shouldBe` 180
 
     context "process" $ do
