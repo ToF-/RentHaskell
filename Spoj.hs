@@ -3,6 +3,9 @@
 import qualified Data.Map as Map
 import Data.Map (insertWith, findWithDefault, assocs,Map, empty, keys, insert, (!), findMax, findMin, toList, lookup)
 import Data.List (sort)
+import Data.ByteString (ByteString)
+import qualified Data.ByteString.Char8 as BS
+import Data.Maybe (fromJust)
 
 type Order = (Time, Time, Money)
 type Time  = Int
@@ -69,7 +72,7 @@ solutions = solutions' . tail
     solve :: [[Int]] -> Int
     solve = profit . map (\[s,d,p] -> order s d p)
 
-process :: String -> String
-process = unlines . map show . solutions . map (map read . words) . lines
+process :: ByteString -> ByteString
+process = BS.unlines . map (BS.pack .show) . solutions . (map $ map (fst . fromJust . BS.readInt)) . (map BS.words) . BS.lines
 
-main = interact process
+main = BS.interact process

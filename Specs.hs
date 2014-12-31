@@ -3,6 +3,8 @@ import Rent
 import qualified Data.Map as Map 
 import Data.Map (toList,(!))
 import Data.List
+import qualified Data.ByteString.Char8 as BS
+import Data.Maybe (fromJust)
 
 main = hspec $ do
     describe "order values" $ do
@@ -72,8 +74,8 @@ main = hspec $ do
 
         describe "process" $ do
             it "should read input and output solutions" $ do
-                let s = "2 \n 1 \n 0 5 100 \n 1 \n 3 7 140 "
-                process s `shouldBe` "100\n140\n"
+                let s = BS.pack "2 \n 1 \n 0 5 100 \n 1 \n 3 7 140 "
+                BS.unpack (process s) `shouldBe` "100\n140\n"
 
 
                                     

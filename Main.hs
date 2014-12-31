@@ -1,0 +1,1 @@
+main = BS.interact process

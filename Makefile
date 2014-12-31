@@ -1,6 +1,6 @@
 Spoj : Rent.hs
 	sed '1d;2d' Rent.hs             >Spoj.hs
-	echo "main = interact process" >>Spoj.hs 
+	cat Main.hs                    >>Spoj.hs
 	ghc --make -O2 Spoj.hs
 
 clean:
