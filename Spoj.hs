@@ -1,4 +1,3 @@
--- concat the code below to Spoj.hs --
 
 import qualified Data.Map as Map
 import Data.Map (insertWith, findWithDefault, assocs,Map, empty, keys, insert, (!), findMax, findMin, toList, lookup)
@@ -73,6 +72,12 @@ solutions = solutions' . tail
     solve = profit . map (\[s,d,p] -> order s d p)
 
 process :: ByteString -> ByteString
-process = BS.unlines . map (BS.pack .show) . solutions . (map $ map (fst . fromJust . BS.readInt)) . (map BS.words) . BS.lines
+process = output . solutions . input
+    where
+    input :: ByteString -> [[Int]]
+    input = (map $ map (fst . fromJust . BS.readInt)).(map BS.words).BS.lines
+
+    output :: [Int] -> ByteString
+    output = BS.unlines . map (BS.pack . show)
 
 main = BS.interact process

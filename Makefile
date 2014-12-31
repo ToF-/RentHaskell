@@ -1,5 +1,5 @@
 Spoj : Rent.hs
-	sed '1d;2d' Rent.hs             >Spoj.hs
+	sed '1d;2d;3d' Rent.hs             >Spoj.hs
 	cat Main.hs                    >>Spoj.hs
 	ghc --make -O2 Spoj.hs
 
