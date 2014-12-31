@@ -3,7 +3,7 @@ where
 -- concat the code below to Spoj.hs --
 
 import qualified Data.Map as Map
-import Data.Map (insertWith', assocs,Map, empty, keys, insert, (!), findMax, findMin, toList, lookup)
+import Data.Map (insertWith, findWithDefault, assocs,Map, empty, keys, insert, (!), findMax, findMin, toList, lookup)
 import Data.List (sort)
 
 type Order = (Time, Time, Money)
@@ -34,9 +34,9 @@ money = fst
 plan :: [Order] -> Plan
 plan os = foldr insertOrder initial os
     where
-    insertOrder o = insertWith' (++) (end o) [(price o, start o)]
+    insertOrder o = insertWith (++) (end o) [(price o, start o)]
     initial       = foldr insertOrderStart empty os
-    insertOrderStart o = insertWith' (++) (start o) []
+    insertOrderStart o = insertWith (++) (start o) []
 
 minStartTime :: Plan -> Time
 minStartTime = fst . findMin  
@@ -45,24 +45,21 @@ minStartTime = fst . findMin
 type Profits = (Map Time Money, Money)
 
 profits :: Plan -> Profits
-profits pl = foldr insertProfit initial (tail $ assocs pl)
+profits pl = foldl insertProfit initial (tail $ assocs pl)
     where
     initial :: Profits
     initial = (insert (minStartTime pl) 0 empty,0)
 
-    insertProfit :: (Time,[Bid]) -> Profits -> Profits
-    insertProfit (t,vs) (pr,m) = (insert t m' pr, m')
+    insertProfit :: Profits -> (Time,[Bid]) -> Profits
+    insertProfit (pr,m) (t,bs) = (insert t newValue pr, newValue)
         where
-        m' = maxValue vs
+        newValue = max m $ maxValue bs 
 
-        maxValue :: [Bid] -> Money
-        maxValue [] = m
-        maxValue bs = (maximum . map value) bs 
+        maxValue [] = 0
+        maxValue xs = (maximum . map value) xs 
 
         value :: Bid -> Money
-        value b = money b + case Map.lookup (time b) pr of
-                                Just v -> v
-                                Nothing -> 0 
+        value b = money b + findWithDefault 0 (time b) pr
 
 profit :: [Order] -> Money
 profit = snd . profits . plan
@@ -79,3 +76,5 @@ solutions = solutions' . tail
 
 process :: String -> String
 process = unlines . map show . solutions . map (map read . words) . lines
+
+test = [order 0 5 100,order 3 7 140,order 5 9 70,order 6 9 80]

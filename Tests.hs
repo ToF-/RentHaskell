@@ -1,20 +1,21 @@
 import Test.QuickCheck
 import Rent
+import Data.List (sort)
 
 arbitraryOrder :: Gen Order
 arbitraryOrder = do
     s <- elements [0..10]
     d <- elements [1..10]
-    p <- elements [0..10]
+    p <- elements [00..1000]
     return $ order s d p 
 
 arbitraryList :: Gen [Order]
 arbitraryList = do
-    n <- elements [1..5]
+    n <- elements [1..10]
     sequence $ replicate n arbitraryOrder
 
 oracle :: [Order] -> Money
-oracle = profit
+oracle = profit . sort
     where 
     profit [] = 0
     profit (o:os) = max

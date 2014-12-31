@@ -7,89 +7,73 @@ import Data.List
 main = hspec $ do
     describe "order values" $ do
         it "should have a start time" $ do
-            start (order 3 5 10) `shouldBe` 3 
+            start (order 3 5 100) `shouldBe` 3 
         
-        it "should have an end time" $ do
-            end (order 3 5 10) `shouldBe` 8
+        it "should have an end time equal to start+duration" $ do
+            end (order 3 5 100) `shouldBe` 8
 
         it "shoud have a price" $ do
-            price (order 3 5 10) `shouldBe` 10
+            price (order 3 5 100) `shouldBe` 100
 
     describe "a plan" $ do
-        it "should map time to order ending at that time" $ do
-            let p = plan [order 0 5 10]
-            toList p `shouldBe` [(0,[]),(5,[(10,0)])]
-
-        it "should map several orders" $ do
-            let p = plan [order 0 5 10, order 3 7 14]
-            p!5  `shouldContain` [(10,0)]
-            p!10 `shouldContain` [(14,3)]
-
-        it "should map several orders on sames times" $ do
-            let p = plan [order 0 5 10, order 0 5 11]
-            toList p `shouldBe` [(0,[]),(5,[(10,0),(11,0)])]
-
-
-        it "should map start times even if not order ending at that time" $ do
-            let p = plan [order 0 2 10, order 3 2 14]
-            toList p `shouldBe` [(0,[]),(2,[(10,0)]),(3,[]),(5,[(14,3)])]
-
+        it "should map time to orders ending at that time" $ do
+            let p = plan [order 0 5 100, order 3 2 140]
+            p `shouldSatisfy` (Map.member 0)
+            p `shouldSatisfy` (Map.member 3)
+            
         it "should hold the minimal start time" $ do
             let p = plan [order 0 5 10, order (-3) 7 14]
             minStartTime p `shouldBe` (-3)
 
     describe "a profit table" $ do
-        it "should map time to money" $ do
-            let t = fst $ profits $ plan [order 0 5 10]
-            t!0 `shouldBe` 0
-            t!5 `shouldBe` 10
-            toList t `shouldBe` [(0,0),(5,10)]
+        let pt = toList . fst . profits . plan 
 
-        it "should contain best profit as its max element" $ do
-            let t = fst $ profits $ plan [order 0 5 10]
-            toList t `shouldBe` [(0,0),(5,10)]
+        it "should map time to best profit at that time" $ do
+            pt [order 0 5 100]
+            `shouldBe` [(0,0),(5,100)]
 
-            let t = fst $ profits $ plan [order 0 5 10, order 3 2 14]
-            toList t `shouldBe` [(0,0),(3,0),(5,14)]
+        it "should contain best profit given orders on same times" $ do
+            pt [order 0 5 100, order 0 5 140]
+            `shouldBe` [(0,0),(5,140)]
 
+        it "should contain best profit in last position" $ do
+            pt [order 0 3 140, order 0 4 100] 
+           `shouldBe` [(0,0),(3,140),(4,140)]
 
-            let t = fst $ profits $ plan [order 0 3 10, order 4 3 7]
-            toList  (plan [order 0 3 10, order 4 3 7])  
-                `shouldBe` [(0,[]),(3,[(10,0)]),(4,[]),(7,[(7,4)])]
+        it "should contain best profit in last position" $ do
+            pt [order 0 5 100,order 3 7 140,order 5 9 70,order 6 9 80]
+           `shouldBe`[(0,0),(3,0),(5,100),(6,100),(10,140),(14,170),(15,180)]
 
-            toList t `shouldBe` [(0,0),(3,10),(4,10),(7,17)]
+        it "should contain best profit given overlapping orders" $ do
+            pt [order 0 5 100, order 3 2 140]
+            `shouldBe` [(0,0),(3,0),(5,140)]
 
-
-            let t = fst $ profits $ plan [order 0 5 10
-                                   ,order 3 7 14
-                                   ,order 5 9 7
-                                   ,order 6 9 8]
-            toList t `shouldBe` [(0,0),(3,0),(5,10),(6,10),(10,14),(14,17),(15,18)]
-
+        it "should contain best profit given non overlapping orders" $ do
+            pt [order 0 5 100, order 6 2 140]
+            `shouldBe` [(0,0),(5,100),(6,100),(8,240)]
 
     describe "profit" $ do
         it "should be the max value for a plan" $ do
-            let os = [order 0 5 10
-                     ,order 3 7 14
-                     ,order 5 9 7
-                     ,order 6 9 8]
-            profit os `shouldBe` 18    
+            let os = [order 0 5 100
+                     ,order 3 7 140
+                     ,order 5 9 70
+                     ,order 6 9 80]
+            profit os `shouldBe` 180
 
     context "process" $ do
         let ls = [[2]
                  ,[1]
-                 ,[0,5,10]
-                 ,[2]
-                 ,[0,5,10]
-                 ,[3,7,14]]
+                 ,[0,5,100]
+                 ,[1]
+                 ,[3,7,140]]
         describe "solutions" $ do
             it "should solve rent problems given as list of lists integers" $ do
-                solutions ls `shouldBe` [10,14] 
+                solutions ls `shouldBe` [100,140] 
 
         describe "process" $ do
             it "should read input and output solutions" $ do
-                let s = "2 \n 1 \n 0 5 10 \n 2 \n 0 5 10 \n 3 7 14"
-                process s `shouldBe` "10\n14\n"
+                let s = "2 \n 1 \n 0 5 100 \n 1 \n 3 7 140 "
+                process s `shouldBe` "100\n140\n"
 
 
                                     
