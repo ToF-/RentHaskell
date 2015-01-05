@@ -27,6 +27,18 @@ main = hspec $ do
             let p = plan [order 0 5 10, order (-3) 7 14]
             minStartTime p `shouldBe` (-3)
 
+    describe "a plan'" $ do
+        it "should map time to positions" $ do
+            let p = plan' [order 0 5 100, order 3 7 140, order 5 5 70] 
+            toList p `shouldBe` [(0,(0,[]))
+                                ,(3,(0,[]))
+                                ,(5,(0,[(100,0)])),
+                                (10,(0,[(140,3),(70,5)]))]
+    describe "a profit'" $ do
+        it "should contain best profit in last position" $ do
+            let p = plan' [order 0 5 100,order 3 7 140,order 5 9 70,order 6 9 80]
+            profit' p `shouldBe` 180
+
     describe "a profit table" $ do
         let pt = toList . fst . profits . plan 
 

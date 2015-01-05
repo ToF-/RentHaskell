@@ -3,7 +3,7 @@ where
 -- concat the code below to Spoj.hs --
 
 import qualified Data.Map as Map
-import Data.Map (insertWith, findWithDefault, assocs,Map, empty, keys, insert, (!), findMax, findMin, toList, lookup)
+import Data.Map (insertWith, findWithDefault, assocs,Map, empty, keys, insert, (!), findMax, findMin, toList, lookup, fromListWith,mapAccumWithKey)
 import Data.List (sort)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as BS
@@ -83,3 +83,35 @@ process = output . solutions . input
     output :: [Int] -> ByteString
     output = BS.unlines . map (BS.pack . show)
 
+type Flight = (Money,Time)
+type Position = (Money,[Flight])
+type Plan' = Map Time Position
+
+plan' :: [Order] -> Plan'
+plan' = fromListWith mergeFlightLists . foldl positions []
+    where
+    mergeFlightLists :: Position -> Position -> Position 
+    mergeFlightLists (_,fl) (_,fl') = (0,fl ++ fl')
+
+    positions :: [(Time,Position)] -> Order -> [(Time,Position)]
+    positions l o = start o : arrival o : l  
+
+    arrival :: Order -> (Time,Position)
+    arrival (s,d,p) = (s+d,(0,[(p,s)]))
+ 
+    start :: Order -> (Time,Position)
+    start (s,_,p) = (s,(0,[]))
+
+profit' :: Plan' -> Money
+profit' = fst . evaluate  
+    where 
+    evaluate :: Plan' -> (Money,Plan')
+    evaluate = foldl profit (0,empty) . assocs 
+
+    profit :: (Money,Plan') -> (Time,Position) -> (Money,Plan')
+    profit (m,p) (t,(_,fl)) = (v,insert t (v,fl) p)
+        where 
+        v = maximum $ m:map profitFromFlight fl  
+
+        profitFromFlight :: Flight -> Money
+        profitFromFlight (m,s)  = (fst $ p!t) + m 
