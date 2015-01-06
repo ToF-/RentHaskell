@@ -1,3 +1,6 @@
+module Rent
+where
+import qualified Data.Map as Map
 import Data.Map (insertWith, findWithDefault, assocs,Map, empty, keys, insert, (!), findMax, findMin, toList, lookup, fromListWith,mapAccumWithKey)
 import Data.List (sort)
 import Data.ByteString (ByteString)
@@ -72,4 +75,3 @@ process = output . solutions . input
     output :: [Int] -> ByteString
     output = BS.unlines . map (BS.pack . show)
 
-main = BS.interact process
