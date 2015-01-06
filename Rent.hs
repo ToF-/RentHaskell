@@ -14,10 +14,6 @@ type Bid    = (Money,Time)
 type Plan   = Map Time [Bid]
 type Profit = Map Time Money
 
-
-order :: Time -> Time -> Money -> Order
-order s d p = (s,d,p)
-
 plan :: [Order] -> Plan
 plan = fromListWith (++) . foldl positions []
     where
@@ -27,7 +23,6 @@ plan = fromListWith (++) . foldl positions []
 profit :: Plan -> Money
 profit p = fst $ foldl calc (0, insert (fst $ findMin p) 0 empty) $ assocs p
     where 
-
     calc :: (Money,Profit) -> (Time,[Bid]) -> (Money,Profit)
     calc (max,plan) (time,bids) = (bestValue,insert time bestValue plan)
         where 
@@ -44,7 +39,7 @@ solutions = solutions' . tail
     solutions' ([n]:ns) = solve (take n ns) : solutions' (drop n ns) 
     
     solve :: [[Int]] -> Int
-    solve = profit . plan . map (\[s,d,p] -> order s d p)
+    solve = profit . plan . map (\[s,d,p] -> (s,d,p))
 
 process :: ByteString -> ByteString
 process = output . solutions . input

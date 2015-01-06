@@ -10,7 +10,7 @@ main = hspec $ do
 
     describe "a plan" $ do
         it "should map time to positions" $ do
-            let p = plan [order 0 5 100, order 3 7 140, order 5 5 70] 
+            let p = plan [(0,5,100),(3,7,140),(5,5,70)] 
             toList p `shouldBe` [(0,[])
                                 ,(3,[])
                                 ,(5,[(100,0)])
@@ -18,7 +18,7 @@ main = hspec $ do
 
     describe "profit" $ do
         it "should be the max value for a plan" $ do
-            let os = [order 0 5 100,order 3 7 140,order 5 9 70,order 6 9 80]
+            let os = [(0,5,100),(3,7,140),(5,9,70),(6,9,80)]
             profit (plan os) `shouldBe` 180
 
     context "process" $ do
