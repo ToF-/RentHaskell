@@ -7,11 +7,6 @@ import qualified Data.ByteString.Char8 as BS
 import Data.Maybe (fromJust)
 
 main = hspec $ do
-    describe "order values" $ do
-        it "should have a start time, end time and price" $ do
-            start (order 3 5 100) `shouldBe` 3 
-            end   (order 3 5 100) `shouldBe` 8
-            price (order 3 5 100) `shouldBe` 100
 
     describe "a plan" $ do
         it "should map time to positions" $ do

@@ -7,53 +7,33 @@ import Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as BS
 import Data.Maybe (fromJust)
 
-type Order = (Time, Time, Money)
-type Time  = Int
-type Money = Int
+type Order  = (Time, Time, Money)
+type Time   = Int
+type Money  = Int
+type Bid    = (Money,Time)
+type Plan   = Map Time [Bid]
+type Profit = Map Time Money
+
 
 order :: Time -> Time -> Money -> Order
 order s d p = (s,d,p)
 
-start :: Order -> Time
-start (s,_,_) = s
-
-end :: Order -> Time
-end (s,d,_) = s + d
-
-price :: Order -> Money
-price (_,_,p) = p
-
-type Flight = (Money,Time)
-type Position = [Flight]
-type Plan = Map Time Position
-
 plan :: [Order] -> Plan
 plan = fromListWith (++) . foldl positions []
     where
-
-    positions :: [(Time,Position)] -> Order -> [(Time,Position)]
-    positions l o = start o : arrival o : l  
-
-    arrival :: Order -> (Time,Position)
-    arrival (s,d,p) = (s+d,[(p,s)])
- 
-    start :: Order -> (Time,Position)
-    start (s,_,p) = (s,[])
-
-type Profit = Map Time Money
+    positions :: [(Time,[Bid])] -> Order -> [(Time,[Bid])]
+    positions orders (start,duration,price) = (start,[]) : (start+duration, [(price,start)]) : orders
 
 profit :: Plan -> Money
-profit = fst . evaluate  
+profit p = fst $ foldl calc (0, insert (fst $ findMin p) 0 empty) $ assocs p
     where 
-    evaluate :: Plan -> (Money,Profit)
-    evaluate p = foldl calc (0, insert (fst $ findMin p) 0 empty) $ assocs p 
 
-    calc :: (Money,Profit) -> (Time,Position) -> (Money,Profit)
-    calc (max,plan) (time,position) = (bestValue,insert time bestValue plan)
+    calc :: (Money,Profit) -> (Time,[Bid]) -> (Money,Profit)
+    calc (max,plan) (time,bids) = (bestValue,insert time bestValue plan)
         where 
-        bestValue = maximum $ max:map value position  
+        bestValue = maximum $ max:map value bids  
 
-        value :: Flight -> Money
+        value :: Bid -> Money
         value (price,start)  = price + (findWithDefault 0 start plan)
 
 solutions :: [[Int]] -> [Int]
