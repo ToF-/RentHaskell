@@ -24,7 +24,7 @@ oracle = profit . sort
 
     after (s,d,_) (s',_,_) = s+d <= s' 
 
-prop_correct_profit = forAll arbitraryList $ \os -> profit (plan os) == oracle os
+prop_correct_profit = forAll arbitraryList $ \os -> profit os == oracle os
 
 main = do quickCheck prop_correct_profit
 

@@ -19,7 +19,7 @@ main = hspec $ do
     describe "profit" $ do
         it "should be the max value for a plan" $ do
             let os = [(0,5,100),(3,7,140),(5,9,70),(6,9,80)]
-            profit (plan os) `shouldBe` 180
+            profit os `shouldBe` 180
 
     context "process" $ do
         let ls = [[2]

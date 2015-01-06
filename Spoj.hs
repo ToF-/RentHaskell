@@ -17,17 +17,17 @@ plan = fromListWith (++) . foldl positions []
     positions :: [(Time,[Bid])] -> Order -> [(Time,[Bid])]
     positions orders (start,duration,price) = (start,[]) : (start+duration, [(price,start)]) : orders
 
-profit :: Plan -> Money
-profit p = fst $ foldl calc (0, insert (fst $ findMin p) 0 empty) $ assocs p
+profit :: [Order]-> Money
+profit os = fst $ foldl calc (0, insert (fst $ findMin p) 0 empty) $ assocs $ p
     where 
-
+    p = plan os
     calc :: (Money,Profit) -> (Time,[Bid]) -> (Money,Profit)
-    calc (max,plan) (time,bids) = (bestValue,insert time bestValue plan)
+    calc (max,profit) (time,bids) = (bestValue,insert time bestValue profit)
         where 
         bestValue = maximum $ max:map value bids  
 
         value :: Bid -> Money
-        value (price,start)  = price + (findWithDefault 0 start plan)
+        value (price,start)  = price + (findWithDefault 0 start profit)
 
 solutions :: [[Int]] -> [Int]
 solutions = solutions' . tail 
@@ -37,7 +37,7 @@ solutions = solutions' . tail
     solutions' ([n]:ns) = solve (take n ns) : solutions' (drop n ns) 
     
     solve :: [[Int]] -> Int
-    solve = profit . plan . map (\[s,d,p] -> (s,d,p))
+    solve = profit . map (\[s,d,p] -> (s,d,p))
 
 process :: ByteString -> ByteString
 process = output . solutions . input
