@@ -1,6 +1,6 @@
 
 import qualified Data.Map as Map
-import Data.Map (insertWith, findWithDefault, assocs,Map, empty, keys, insert, (!), findMax, findMin, toList, lookup)
+import Data.Map (insertWith, findWithDefault, assocs,Map, empty, keys, insert, (!), findMax, findMin, toList, lookup, fromListWith,mapAccumWithKey)
 import Data.List (sort)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as BS
@@ -22,44 +22,38 @@ end (s,d,_) = s + d
 price :: Order -> Money
 price (_,_,p) = p
 
-type Bid  = (Money,Time)
-type Plan = Map Time [Bid]
-
-time :: Bid -> Time
-time = snd
-
-money :: Bid -> Money
-money = fst 
+type Flight = (Money,Time)
+type Position = [Flight]
+type Plan = Map Time Position
 
 plan :: [Order] -> Plan
-plan os = foldr insertOrder initial os
+plan = fromListWith (++) . foldl positions []
     where
-    insertOrder o = insertWith (++) (end o) [(price o, start o)]
-    initial       = foldr insertOrderStart empty os
-    insertOrderStart o = insertWith (++) (start o) []
 
-minStartTime :: Plan -> Time
-minStartTime = fst . findMin  
+    positions :: [(Time,Position)] -> Order -> [(Time,Position)]
+    positions l o = start o : arrival o : l  
 
+    arrival :: Order -> (Time,Position)
+    arrival (s,d,p) = (s+d,[(p,s)])
+ 
+    start :: Order -> (Time,Position)
+    start (s,_,p) = (s,[])
 
-type Profits = (Map Time Money, Money)
+type Profit = Map Time Money
 
-profits :: Plan -> Profits
-profits pl = foldl insertProfit initial (tail $ assocs pl)
-    where
-    initial :: Profits
-    initial = (insert (minStartTime pl) 0 empty,0)
+profit :: Plan -> Money
+profit = fst . evaluate  
+    where 
+    evaluate :: Plan -> (Money,Profit)
+    evaluate p = foldl calc (0, insert (fst $ findMin p) 0 empty) $ assocs p 
 
-    insertProfit :: Profits -> (Time,[Bid]) -> Profits
-    insertProfit (pr,m) (t,bs) = (insert t newValue pr, newValue)
-        where
-        newValue = maximum $ m : map value bs
+    calc :: (Money,Profit) -> (Time,Position) -> (Money,Profit)
+    calc (max,plan) (time,position) = (bestValue,insert time bestValue plan)
+        where 
+        bestValue = maximum $ max:map value position  
 
-        value :: Bid -> Money
-        value b = money b + findWithDefault 0 (time b) pr
-
-profit :: [Order] -> Money
-profit = snd . profits . plan
+        value :: Flight -> Money
+        value (price,start)  = price + (findWithDefault 0 start plan)
 
 solutions :: [[Int]] -> [Int]
 solutions = solutions' . tail 
@@ -69,7 +63,7 @@ solutions = solutions' . tail
     solutions' ([n]:ns) = solve (take n ns) : solutions' (drop n ns) 
     
     solve :: [[Int]] -> Int
-    solve = profit . map (\[s,d,p] -> order s d p)
+    solve = profit . plan . map (\[s,d,p] -> order s d p)
 
 process :: ByteString -> ByteString
 process = output . solutions . input
