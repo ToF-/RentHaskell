@@ -1,7 +1,7 @@
 module Rent
 where
 import qualified Data.Map as Map
-import Data.Map (insertWith, findWithDefault, assocs,Map, empty, keys, insert, (!), findMax, findMin, toList, lookup, fromListWith,mapAccumWithKey)
+import Data.Map (insertWith, findWithDefault, assocs,Map, empty, keys, insert, (!), findMax, findMin, toList, lookup, fromListWith, fromList, mapAccumWithKey)
 import Data.List (sort)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as BS
@@ -13,6 +13,24 @@ type Money  = Int
 type Bid    = (Money,Time)
 type Plan   = Map Time [Bid]
 type Profit = Map Time Money
+
+plan' :: [Order] -> Profit
+plan' = fromList . foldl positions []
+    where
+    positions :: [(Time,Money)] -> Order -> [(Time,Money)]
+    positions profits (start,duration,_) = (start,0) : (start+duration,0) : profits
+
+profit' :: [Order] -> Money
+profit' os = fst $ foldl calc (0, p) $ sort os
+    where
+    p = plan' os
+    calc :: (Money,Profit) -> Order -> (Money,Profit)
+    calc (value,profit) (start,duration,price) =
+        let
+        profit' = insertWith max (start+duration) (value+price) profit
+        value'  = max value (findWithDefault 0 start profit)  
+        in (value',profit')
+          
 
 plan :: [Order] -> Plan
 plan = fromListWith (++) . foldl positions []
