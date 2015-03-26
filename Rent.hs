@@ -21,7 +21,7 @@ plan' = fromList . foldl positions []
     positions profits (start,duration,_) = (start,0) : (start+duration,0) : profits
 
 profit' :: [Order] -> Money
-profit' os = fst $ foldl calc (0, p) $ sort os
+profit' os = snd $ findMax $ snd $ foldl calc (0, p) $ sort os
     where
     p = plan' os
     calc :: (Money,Profit) -> Order -> (Money,Profit)
