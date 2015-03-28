@@ -18,7 +18,7 @@ profit :: [Order] -> Money
 profit = fst . plan
 
 plan :: [Order] -> (Money,Profit)
-plan os = foldl calc (0, Map.empty) $ schedule os
+plan os = foldl calc (0, empty) $ schedule os
     where
     calc :: (Money, Profit) -> (Time, Maybe (Time, Money)) -> (Money, Profit)
     calc (m,pr) (t, Just (e,p)) = (m, insertWith max e (m+p) pr)
