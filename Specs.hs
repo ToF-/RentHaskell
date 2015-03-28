@@ -4,7 +4,6 @@ import qualified Data.Map as Map
 import Data.Map (toList,(!))
 import Data.List
 import qualified Data.ByteString.Char8 as BS
-import Data.Maybe (fromJust)
 
 main = hspec $ do
 
@@ -30,20 +29,14 @@ main = hspec $ do
                          ,(7, 7,  800)
                          ,(8, 7,  900)]
                 schedule os `shouldBe` 
-                    [(00, Just (7,1000))
-                    ,(03, Just (8,1400))
-                    ,(07, Nothing)
-                    ,(07, Just (14, 800))
-                    ,(08, Nothing)
-                    ,(08, Just (15, 900))
-                    ,(14, Nothing)
-                    ,(15, Nothing)]
-
-    describe "a plan" $ do
-        it "should map time to profit" $ do
-            let p = plan [(0,5,100),(3,7,140),(5,5,70)] 
-            toList (snd p) `shouldBe` 
-                [(5,100) ,(10,170)]
+                    [( 0, Rent ( 7,1000))
+                    ,( 3, Rent ( 8,1400))
+                    ,( 7, Cash)
+                    ,( 7, Rent (14, 800))
+                    ,( 8, Cash)
+                    ,( 8, Rent (15, 900))
+                    ,(14, Cash)
+                    ,(15, Cash)]
 
     describe "profit" $ do
         it "should be the max value for a plan" $ do
