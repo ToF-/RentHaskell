@@ -1,4 +1,4 @@
-import Data.Map (insertWith, findWithDefault, assocs,Map, empty, keys, insert, (!), findMax, findMin, toList, lookup, fromListWith, fromList, mapAccumWithKey)
+import Data.Map (insertWith, findWithDefault, Map, empty)
 import Data.List (sort)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as BS
@@ -7,28 +7,26 @@ import Data.Maybe (fromJust)
 type Order  = (Time, Time, Money)
 type Time   = Int
 type Money  = Int
-type Bid    = (Money,Time)
-type Plan   = Map Time [Bid]
+data Slot   = Cash | Rent (Time, Money)
+    deriving(Eq,Ord,Show)
+type Schedule = [(Time,Slot)]
 type Profit = Map Time Money
 
 profit :: [Order] -> Money
-profit = fst . plan
-
-plan :: [Order] -> (Money,Profit)
-plan os = foldl calc (0, empty) $ schedule os
+profit = fst . foldl calc (0, empty) . schedule
     where
-    calc :: (Money, Profit) -> (Time, Maybe (Time, Money)) -> (Money, Profit)
-    calc (m,pr) (t, Just (e,p)) = (m, insertWith max e (m+p) pr)
-    calc (m,pr) (e, Nothing) = (max m (findWithDefault 0 e pr),pr)
+    calc :: (Money, Profit) -> (Time, Slot) -> (Money, Profit)
+    calc (value, profits) (_, Rent (end, price)) = (value, insertWith max end (value+price) profits)
+    calc (value, profits) (time, Cash)           = (max value (findWithDefault 0 time profits), profits)
 
-schedule :: [Order] -> [(Time, Maybe (Time, Money))]
+schedule :: [Order] -> Schedule
 schedule os = sort $ (map bid os) ++ (map slot os)
     where
-    bid :: Order -> (Time, Maybe (Time, Money))
-    bid (start,duration,price) = (start, Just (start+duration,price))
+    bid :: Order -> (Time, Slot)
+    bid (start,duration,price) = (start, Rent (start+duration,price))
 
-    slot :: Order -> (Time, Maybe (Time, Money))
-    slot (start,duration,_) = (start+duration, Nothing)
+    slot :: Order -> (Time, Slot) 
+    slot (start,duration,_) = (start+duration, Cash)
 
 
 solutions :: [[Int]] -> [Int]

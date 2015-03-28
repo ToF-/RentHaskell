@@ -1,3 +1,4 @@
+-- Rent.hs   all except the first 3 lines are copied to Spoj.hs
 module Rent
 where
 import Data.Map (insertWith, findWithDefault, Map, empty)
