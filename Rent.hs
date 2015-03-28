@@ -14,11 +14,11 @@ type Bid    = (Money,Time)
 type Plan   = Map Time [Bid]
 type Profit = Map Time Money
 
-profit' :: [Order] -> Money
-profit' = fst . plan'
+profit :: [Order] -> Money
+profit = fst . plan
 
-plan' :: [Order] -> (Money,Profit)
-plan' os = foldl calc (0, Map.empty) $ schedule os
+plan :: [Order] -> (Money,Profit)
+plan os = foldl calc (0, Map.empty) $ schedule os
     where
     calc :: (Money, Profit) -> (Time, Maybe (Time, Money)) -> (Money, Profit)
     calc (m,pr) (t, Just (e,p)) = (m, insertWith max e (m+p) pr)
@@ -33,23 +33,6 @@ schedule os = sort $ (map bid os) ++ (map slot os)
     slot :: Order -> (Time, Maybe (Time, Money))
     slot (start,duration,_) = (start+duration, Nothing)
 
-plan :: [Order] -> Plan
-plan = fromListWith (++) . foldl positions []
-    where
-    positions :: [(Time,[Bid])] -> Order -> [(Time,[Bid])]
-    positions orders (start,duration,price) = (start,[]) : (start+duration, [(price,start)]) : orders
-
-profit :: [Order]-> Money
-profit os = fst $ foldl calc (0, insert (fst $ findMin p) 0 empty) $ assocs $ p
-    where 
-    p = plan os
-    calc :: (Money,Profit) -> (Time,[Bid]) -> (Money,Profit)
-    calc (max,profit) (time,bids) = (bestValue,insert time bestValue profit)
-        where 
-        bestValue = maximum $ max:map value bids  
-
-        value :: Bid -> Money
-        value (price,start)  = price + (findWithDefault 0 start profit)
 
 solutions :: [[Int]] -> [Int]
 solutions = solutions' . tail 

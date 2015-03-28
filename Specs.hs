@@ -8,19 +8,6 @@ import Data.Maybe (fromJust)
 
 main = hspec $ do
 
-    describe "a plan" $ do
-        it "should map time to positions" $ do
-            let p = plan [(0,5,100),(3,7,140),(5,5,70)] 
-            toList p `shouldBe` [(0,[])
-                                ,(3,[])
-                                ,(5,[(100,0)])
-                                ,(10,[(140,3),(70,5)])]
-
-    describe "profit" $ do
-        it "should be the max value for a plan" $ do
-            let os = [(0,5,100),(3,7,140),(5,9,70),(6,9,80)]
-            profit os `shouldBe` 180
-
     context "process" $ do
         let ls = [[2]
                  ,[1]
@@ -52,16 +39,16 @@ main = hspec $ do
                     ,(14, Nothing)
                     ,(15, Nothing)]
 
-    describe "a plan'" $ do
+    describe "a plan" $ do
         it "should map time to profit" $ do
-            let p = plan' [(0,5,100),(3,7,140),(5,5,70)] 
+            let p = plan [(0,5,100),(3,7,140),(5,5,70)] 
             toList (snd p) `shouldBe` 
                 [(5,100) ,(10,170)]
 
-    describe "profit'" $ do
+    describe "profit" $ do
         it "should be the max value for a plan" $ do
             let os = [(0,5,100),(3,7,140),(5,9,70),(6,9,80)]
-            profit' os `shouldBe` 180
+            profit os `shouldBe` 180
                 
 
                                     
