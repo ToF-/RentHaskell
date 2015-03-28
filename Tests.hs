@@ -11,7 +11,7 @@ arbitraryOrder = do
 
 arbitraryList :: Gen [Order]
 arbitraryList = do
-    n <- elements [1..10]
+    n <- elements [1..30]
     sequence $ replicate n arbitraryOrder
 
 oracle :: [Order] -> Money
@@ -24,7 +24,9 @@ oracle = profit . sort
 
     after (s,d,_) (s',_,_) = s+d <= s' 
 
-prop_correct_profit = forAll arbitraryList $ \os -> profit os == oracle os
+prop_correct_profit = forAll arbitraryList $ \os -> profit' os == oracle os
+prop_correct_profit' = forAll arbitraryList $ \os -> profit' os == profit os
 
 main = do quickCheck prop_correct_profit
+          quickCheck prop_correct_profit'
 

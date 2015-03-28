@@ -14,23 +14,24 @@ type Bid    = (Money,Time)
 type Plan   = Map Time [Bid]
 type Profit = Map Time Money
 
-plan' :: [Order] -> Profit
-plan' = fromList . foldl positions []
-    where
-    positions :: [(Time,Money)] -> Order -> [(Time,Money)]
-    positions profits (start,duration,_) = (start,0) : (start+duration,0) : profits
-
 profit' :: [Order] -> Money
-profit' os = fst $ foldl calc (0, p) $ sort os
+profit' = fst . plan'
+
+plan' :: [Order] -> (Money,Profit)
+plan' os = foldl calc (0, Map.empty) $ schedule os
     where
-    p = plan' os
-    calc :: (Money,Profit) -> Order -> (Money,Profit)
-    calc (value,profit) (start,duration,price) =
-        let
-        profit' = insertWith max (start+duration) (value+price) profit
-        value'  = max value (findWithDefault 0 start profit)  
-        in (value',profit')
-          
+    calc :: (Money, Profit) -> (Time, Maybe (Time, Money)) -> (Money, Profit)
+    calc (m,pr) (t, Just (e,p)) = (m, insertWith max e (m+p) pr)
+    calc (m,pr) (e, Nothing) = (max m (findWithDefault 0 e pr),pr)
+
+schedule :: [Order] -> [(Time, Maybe (Time, Money))]
+schedule os = sort $ (map bid os) ++ (map slot os)
+    where
+    bid :: Order -> (Time, Maybe (Time, Money))
+    bid (start,duration,price) = (start, Just (start+duration,price))
+
+    slot :: Order -> (Time, Maybe (Time, Money))
+    slot (start,duration,_) = (start+duration, Nothing)
 
 plan :: [Order] -> Plan
 plan = fromListWith (++) . foldl positions []
