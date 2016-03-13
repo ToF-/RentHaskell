@@ -1,0 +1,50 @@
+	Sun Mar 13 09:48 2016 Time and Allocation Profiling Report  (Final)
+
+	   Spoj +RTS -sstderr -p -RTS
+
+	total time  =        3.76 secs   (3763 ticks @ 1000 us, 1 processor)
+	total alloc = 1,451,266,256 bytes  (excludes profiling overheads)
+
+COST CENTRE          MODULE  %time %alloc
+
+schedule             Main     58.8   46.8
+profit.calc          Main     18.4   15.6
+process.input        Main     17.1   29.9
+solutions.solve      Main      1.6    2.5
+profit               Main      1.6    2.0
+solutions.solutions' Main      0.9    1.2
+schedule.cash        Main      0.9    1.3
+
+
+                                                                     individual     inherited
+COST CENTRE              MODULE                    no.     entries  %time %alloc   %time %alloc
+
+MAIN                     MAIN                       44           0    0.0    0.0   100.0  100.0
+ main                    Main                       89           0    0.3    0.0    99.9  100.0
+  process                Main                       91           0    0.0    0.0    99.7  100.0
+   process.input         Main                       97           0   17.1   29.9    17.1   29.9
+   solutions             Main                       95           0    0.0    0.0    82.6   70.1
+    solutions.solve      Main                      100           0    1.6    2.5    81.6   68.9
+     solutions.solve.\   Main                      106      300000    0.0    0.0     0.0    0.0
+     profit              Main                      102           0    1.6    2.0    80.0   66.4
+      profit.calc        Main                      108      600000   18.4   15.6    18.4   15.6
+      schedule           Main                      103          30   58.8   46.8    60.0   48.8
+       schedule.rent     Main                      107      300000    0.3    0.7     0.3    0.7
+       schedule.cash     Main                      105      300000    0.9    1.3     0.9    1.3
+       schedule.time     Main                      104    16803300    0.0    0.0     0.0    0.0
+    solutions.solutions' Main                       98          31    0.9    1.2     0.9    1.2
+   process.output        Main                       93           0    0.0    0.0     0.0    0.0
+ CAF                     Main                       87           0    0.0    0.0     0.0    0.0
+  profit                 Main                      101           1    0.0    0.0     0.0    0.0
+  solutions              Main                       94           1    0.0    0.0     0.0    0.0
+   solutions.solve       Main                       99           1    0.0    0.0     0.0    0.0
+  process                Main                       90           1    0.0    0.0     0.0    0.0
+   process.input         Main                       96           1    0.0    0.0     0.0    0.0
+   process.output        Main                       92           1    0.0    0.0     0.0    0.0
+  main                   Main                       88           1    0.0    0.0     0.0    0.0
+ CAF                     Data.ByteString.Char8      85           0    0.0    0.0     0.0    0.0
+ CAF                     GHC.Conc.Signal            83           0    0.0    0.0     0.0    0.0
+ CAF                     GHC.IO.Encoding            76           0    0.0    0.0     0.0    0.0
+ CAF                     GHC.IO.Encoding.Iconv      74           0    0.0    0.0     0.0    0.0
+ CAF                     GHC.IO.Handle.FD           67           0    0.0    0.0     0.0    0.0
+ CAF                     GHC.IO.Handle.Internals    66           0    0.0    0.0     0.0    0.0

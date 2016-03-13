@@ -29,14 +29,14 @@ main = hspec $ do
                          ,(7, 7,  800)
                          ,(8, 7,  900)]
                 schedule os `shouldBe` 
-                    [( 0, Rent ( 7,1000))
-                    ,( 3, Rent ( 8,1400))
-                    ,( 7, Cash)
-                    ,( 7, Rent (14, 800))
-                    ,( 8, Cash)
-                    ,( 8, Rent (15, 900))
-                    ,(14, Cash)
-                    ,(15, Cash)]
+                    [Rent 0 7 1000
+                    ,Rent 3 5 1400
+                    ,Cash 7
+                    ,Rent 7 7  800
+                    ,Cash 8
+                    ,Rent 8 7  900
+                    ,Cash 14
+                    ,Cash 15]
 
     describe "profit" $ do
         it "should be the max value for a plan" $ do
